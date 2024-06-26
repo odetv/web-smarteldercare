@@ -29,6 +29,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import RedIcon from "../assets/images/components/red-circle.gif";
 import WarningIcon from "@mui/icons-material/Warning";
+import Lansia from "@/assets/images/components/lansia.jpg";
 
 export default function Camera() {
   const [isSelectedAI, setIsSelectedAI] = React.useState(true);
@@ -166,7 +167,8 @@ export default function Camera() {
                       <Image
                         width={640}
                         height={640}
-                        src={photoLansia}
+                        src={Lansia}
+                        // src={photoLansia}
                         alt="Pantau Hama Tanaman"
                         className="rounded-lg"
                       />

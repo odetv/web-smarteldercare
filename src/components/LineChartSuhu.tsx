@@ -13,7 +13,8 @@ import {
 } from "@nextui-org/react";
 import * as XLSX from "xlsx";
 import { database } from "../../firebaseConfig";
-import { get, onValue, ref } from "firebase/database";
+import { get, getDatabase, onValue, ref } from "firebase/database";
+import CloudIcon from "@mui/icons-material/Cloud";
 
 export default function LineChartSuhu() {
   const chartRef = useRef<HTMLCanvasElement>(null);
@@ -21,6 +22,7 @@ export default function LineChartSuhu() {
   const [labels, setLabels] = useState<string[]>([]);
   const [timeRange, setTimeRange] = useState<string>("1d"); // Default 1 day
   const [timestamp, setTimestamp] = useState<string>("");
+  const [statusKelembabanUdara, setStatusKelembabanUdara] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -185,12 +187,35 @@ export default function LineChartSuhu() {
     }
   }
 
+  useEffect(() => {
+    const db = getDatabase();
+    const dataRef = ref(db, "data");
+
+    const unsubscribe = onValue(dataRef, (snapshot) => {
+      snapshot.forEach((dateSnapshot) => {
+        dateSnapshot.forEach((timeSnapshot) => {
+          const data = timeSnapshot.val();
+          if (data && data.sensor_kelembaban_udara !== undefined) {
+            setStatusKelembabanUdara(data.sensor_kelembaban_udara);
+          }
+        });
+      });
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <div className="w-full">
       <div className="flex flex-row justify-between items-center w-full">
         <div className="text-xs flex flex-row items-center justify-start">
           <p className="pr-1 font-bold">Waktu:</p>
           <p>{timestamp ? timestamp : "-"}</p>
+        </div>
+
+        <div className="text-xs flex flex-row items-center justify-start gap-1">
+          <CloudIcon color="primary" />
+          <p>{statusKelembabanUdara ? statusKelembabanUdara : "-"}</p>
         </div>
 
         <Dropdown backdrop="transparent" radius="sm" className="p-1 mb-4">

@@ -5,6 +5,8 @@ const nextConfig = {
       "nextgen.smartgreenovation.com",
       "nextgen.dev.smartgreenovation.com",
       "asset.kompas.com",
+      "telegra.ph",
+      "https://telegra.ph/file/f854ba4dc39e3d29696bb.jpg",
     ],
     remotePatterns: [
       {
