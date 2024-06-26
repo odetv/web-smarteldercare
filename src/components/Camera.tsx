@@ -37,6 +37,7 @@ export default function Camera() {
   const [photoLansia, setPhotoLansia] = useState("");
   const [statusLansia, setStatusLansia] = useState("");
   const [timestamp, setTimestamp] = useState("");
+  const [statusGerak, setStatusGerak] = useState("");
 
   useEffect(() => {
     const db = getDatabase();
@@ -100,27 +101,150 @@ export default function Camera() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const db = getDatabase();
+    const dataRef = ref(db, "data");
+
+    const unsubscribe = onValue(dataRef, (snapshot) => {
+      snapshot.forEach((dateSnapshot) => {
+        dateSnapshot.forEach((timeSnapshot) => {
+          const data = timeSnapshot.val();
+          if (data && data.sensor_gerak !== undefined) {
+            const statusGerakReal = data.sensor_gerak == 1 ? "Hidup" : "Mati";
+            setStatusGerak(statusGerakReal);
+          }
+        });
+      });
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
     <>
       <div
         id="ai"
-        className="bg-green-100 p-6 rounded-xl text-center flex flex-col justify-center items-center w-full"
+        className="bg-[#6ef6f8] p-4 rounded-xl text-center flex flex-col justify-center items-center w-full"
       >
         <p className="font-semibold text-md">Monitoring Lansia</p>
-        <p className="text-sm">Pantau Aktivitas Lansia Secara Realtime</p>
+        <p className="text-sm">
+          {isSelectedAI && isPreviewAI
+            ? "Pantau Aktivitas Lansia Secara Realtime (AI)"
+            : "Pantau Aktivitas Lansia Secara Realtime (No-AI)"}
+        </p>
         <div>
-          <div className="flex flex-row gap-1 mt-4 mb-4 bg-green-200 p-4 rounded-lg justify-center items-center">
-            <p className="text-sm font-semibold">
-              Deteksi Gerakan: {statusLansia}
+          <div className="flex flex-row gap-1 mt-2 mb-2 bg-[#50e3e6] p-2 rounded-lg justify-center items-center">
+            <p className="text-sm">
+              Deteksi Gerakan:{" "}
+              <span className="font-semibold">{statusGerak}</span>
             </p>
           </div>
-          <div>
-            <Button onPress={onOpen} size="sm" color="primary" variant="flat">
-              Pantau Hama
-            </Button>
+          <div className="relative flex justify-center items-center">
+            {isSelectedAI && isPreviewAI ? (
+              <>
+                {photoLansia ? (
+                  <>
+                    <Chip
+                      startContent={
+                        <Image
+                          src={RedIcon}
+                          alt="Red Icon"
+                          width={8}
+                          height={8}
+                        />
+                      }
+                      color="danger"
+                      variant="dot"
+                      size="sm"
+                      className="absolute top-4 right-4 z-10 bg-white opacity-50 pl-2"
+                    >
+                      <p className="pl-1">Live</p>
+                    </Chip>
+                    <div className="flex flex-col">
+                      <Image
+                        width={640}
+                        height={640}
+                        src={photoLansia}
+                        alt="Pantau Hama Tanaman"
+                        className="rounded-lg"
+                      />
+                      <div className="pt-2 text-xs flex flex-row">
+                        <p className="font-semibold pr-1">Update Terakhir:</p>
+                        <p>{timestamp}</p>
+                      </div>
+                      <div className="text-xs flex flex-row">
+                        <p className="font-semibold pr-1">Status Lansia:</p>
+                        <p>{statusLansia}</p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col justify-center items-center gap-1 pt-6 pb-6">
+                    <WarningIcon color="warning" fontSize="medium" />
+                    <p className="text-sm">Kamera Tidak Aktif!</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {imageUrl ? (
+                  <>
+                    <Chip
+                      startContent={
+                        <Image
+                          src={RedIcon}
+                          alt="Red Icon"
+                          width={8}
+                          height={8}
+                        />
+                      }
+                      color="danger"
+                      variant="dot"
+                      size="sm"
+                      className="absolute top-4 right-4 z-10 bg-white opacity-50 pl-2"
+                    >
+                      <p className="pl-1">Live</p>
+                    </Chip>
+                    <div className="flex flex-col">
+                      <Image
+                        width={640}
+                        height={640}
+                        src={imageUrl}
+                        alt="Pantau Kamera Pengintai"
+                        className="rounded-lg"
+                      />
+                      <div className="pt-2 text-xs flex flex-row">
+                        <p className="font-semibold pr-1">Update Terakhir:</p>
+                        <p>{timestamp}</p>
+                      </div>
+                      <div className="text-xs flex flex-row">
+                        <p className="font-semibold pr-1">Status Lansia: </p>
+                        <p>-</p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col justify-center items-center gap-1 pt-6 pb-6">
+                    <WarningIcon color="warning" fontSize="medium" />
+                    <p className="text-sm">Kamera Tidak Aktif!</p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
+          {/* <div className="flex flex-row justify-center items-center pt-2">
+            <p className="text-sm">Komparasi</p>
+            <Switch
+              className="pl-2"
+              size="sm"
+              isSelected={isPreviewAI}
+              onValueChange={setIsPreviewAI}
+              defaultSelected
+              color="success"
+            ></Switch>
+          </div> */}
         </div>
       </div>
       <Modal

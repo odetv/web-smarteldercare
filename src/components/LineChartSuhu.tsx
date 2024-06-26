@@ -25,7 +25,7 @@ export default function LineChartSuhu() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const datesRef = ref(database, "esp32");
+        const datesRef = ref(database, "data");
         const datesSnapshot = await get(datesRef);
         if (datesSnapshot.exists()) {
           const datesData = datesSnapshot.val();
@@ -39,7 +39,7 @@ export default function LineChartSuhu() {
           }
           const latestDate = filteredDates.sort().reverse()[0];
 
-          const dataRef = ref(database, `esp32/${latestDate}`);
+          const dataRef = ref(database, `data/${latestDate}`);
           onValue(dataRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) {
@@ -57,7 +57,7 @@ export default function LineChartSuhu() {
 
             times.forEach((time) => {
               newLabels.push(time);
-              newChartData.push(parseFloat(data[time].sensor_suhu_air));
+              newChartData.push(parseFloat(data[time].sensor_suhu_udara));
             });
 
             setLabels(newLabels);
@@ -129,7 +129,7 @@ export default function LineChartSuhu() {
                 type: "category",
               },
               y: {
-                beginAtZero: true,
+                beginAtZero: false,
               },
             },
           },
